@@ -4,7 +4,6 @@ import ajuapp.database.DBUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Author
 public final class Professor extends Academic<Professor> implements IAcademic {
@@ -40,5 +39,4 @@ public final class Professor extends Academic<Professor> implements IAcademic {
     }
 
     public void runProfessor(){}
-
 }

@@ -31,5 +31,4 @@ public interface IExit {
         System.out.println();
         System.out.println(header);
     }
-
 }

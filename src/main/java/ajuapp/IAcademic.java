@@ -126,7 +126,6 @@ public interface IAcademic {
         }
 
         return 0;
-
     }
 
     default <T> void printBalance(Student student, Person<T> currentUser) {

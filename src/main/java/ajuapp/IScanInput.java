@@ -152,19 +152,4 @@ public interface IScanInput extends IExit {
         System.out.println("3 - Print your balance");
         return in.nextLine();
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

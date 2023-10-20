@@ -9,7 +9,7 @@ import java.util.List;
 import static ajuapp.utils.ProjectConstants.*;
 
 @Author
-public final class Student extends Academic<Student> implements IAcademic, IExit, IScanInput, IStudent {
+public final class Student extends Academic<Student> implements IAcademic, IExit, IScanInput {
     private int tblStudentId;
     private int tblStudentPersonId;
     private int tblStudentAcademicId;
