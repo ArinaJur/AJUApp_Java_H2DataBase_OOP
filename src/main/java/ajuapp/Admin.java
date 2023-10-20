@@ -5,17 +5,21 @@ import ajuapp.database.Table;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 import static ajuapp.Course.courses;
-import static ajuapp.Professor.professors;
 import static ajuapp.Student.students;
+import static ajuapp.utils.ProjectConstants.*;
 
-public final class Admin extends Person<Admin> implements IPrintAdmin, IExit, IPrintAcademic {
+@Author
+public final class Admin extends Person<Admin> implements IAdmin, IExit, IAcademic, IScanInput {
     private int tblAdminId;
     private int tblAdminPersonId;
     private String roleId = "A";
     public static List<Admin> admins = new ArrayList<>();
+    private static Admin currentAdmin;
+
+    Admin() {
+    }
 
     public Admin(String firstName, String lastName) {
         super(firstName, lastName);
@@ -39,8 +43,6 @@ public final class Admin extends Person<Admin> implements IPrintAdmin, IExit, IP
         super(tblPersonId, firstName, lastName, userName, password);
     }
 
-    public Admin(){}
-
     public int getTblAdminId() {
         return tblAdminId;
     }
@@ -51,6 +53,22 @@ public final class Admin extends Person<Admin> implements IPrintAdmin, IExit, IP
 
     public String getRoleId() {
         return roleId;
+    }
+
+    public Admin getCurrentAdmin() {
+        return currentAdmin;
+    }
+
+    public void setCurrentAdmin(Admin admin) {
+        currentAdmin = admin;
+    }
+
+    private Student getLastStudent() {
+        return students.get(students.size() - 1);
+    }
+
+    private Professor getLastProfessor() {
+        return new Professor();
     }
 
     @Override
@@ -74,377 +92,374 @@ public final class Admin extends Person<Admin> implements IPrintAdmin, IExit, IP
 
     @Override
     public Admin getTableData(int id) {
-        admins = DBUtils.getTableAdminData();
-        for (Admin admin : admins) {
-            if (admin.getTblAdminId() == id) {
-                return admin;
-            }
-        }
-
-        return null;
-    }
-
-    public static void addAdmin(Admin admin) {
-        DBUtils.insertAdmin(admin);
-        admins = DBUtils.getTableAdminData();
-    }
-
-    private void addStudent(String firstName, String lastName) {
-        Student student = new Student(firstName, lastName);
-        DBUtils.insertStudent(student);
-        students = DBUtils.getTableStudentData();
-    }
-
-    private void addProfessor(String firstName, String lastName) {
-
-    }
-
-    private Student getLastStudent() {
-        return students.get(students.size() - 1);
-    }
-
-    private Professor getLastProfessor() {
-        return professors.get(professors.size() - 1);
-    }
-
-    private void addCourse(Course course) {
-        DBUtils.insertCourse(course);
-        courses = DBUtils.getTableCourseData();
-    }
-
-    public <T> void registerForCourses(Academic<T> person, List<Integer> coursesIds) {
-        final int[] dbIds = {person.getCourse1(), person.getCourse2(), person.getCourse3(),
-                person.getCourse4(), person.getCourse5(), person.getCourse6()};
-
-        for (int courseId : coursesIds) {
-            for (int i = 0; i <= dbIds.length - 1; i++) {
-                if (dbIds[i] == 0) {
-                    dbIds[i] = courseId;
-                    switch (i) {
-                        case 0 -> person.setCourse1(courseId);
-                        case 1 -> person.setCourse2(courseId);
-                        case 2 -> person.setCourse3(courseId);
-                        case 3 -> person.setCourse4(courseId);
-                        case 4 -> person.setCourse5(courseId);
-                        case 5 -> person.setCourse6(courseId);
-                    }
-                    break;
+        if (currentAdmin != null) {
+            admins = DBUtils.getTableAdminData();
+            for (Admin admin : admins) {
+                if (admin.getTblAdminId() == id) {
+                    return admin;
                 }
             }
         }
-        DBUtils.updateAcademicEnroll(person);
-        Student.students = DBUtils.getTableStudentData();
-        Professor.professors = DBUtils.getTableProfessorData();
+        return null;
     }
 
-    private void runAdminIfQ(String input) {
-        if (input.equalsIgnoreCase("Q" )) {
-            runAdmin();
+    public static void addFirstAdmin() {
+        if (new Admin().getCurrentAdmin() == null) {
+            Admin admin = new Admin(FIRST_NAME, LAST_NAME);
+            DBUtils.insertAdmin(admin);
+            admins = DBUtils.getTableAdminData();
+        }
+    }
+
+    private void addAdmin(String firstName, String lastName) {
+        if (getCurrentAdmin() != null) {
+            Admin admin = new Admin(firstName, lastName);
+            DBUtils.insertAdmin(admin);
+            admins = DBUtils.getTableAdminData();
+        }
+    }
+
+    private void addAdmin(Admin admin) {
+        if (admin.getCurrentAdmin() != null) {
+            DBUtils.insertAdmin(admin);
+            admins = DBUtils.getTableAdminData();
+        }
+    }
+
+    private void addStudent(String firstName, String lastName) {
+        if (currentAdmin != null) {
+            Student student = new Student(firstName, lastName);
+            DBUtils.insertStudent(student);
+            students = DBUtils.getTableStudentData();
+        }
+    }
+
+    private void addStudent(Student student) {
+        if (currentAdmin != null) {
+            DBUtils.insertStudent(student);
+            students = DBUtils.getTableStudentData();
+        }
+    }
+
+    //TODO Add Professor Functionality
+    private void addProfessor(String firstName, String lastName) {
+        if (currentAdmin != null) {
+            System.out.println("TO DO: addProfessor(String firstName, String lastName)");
+        }
+    }
+
+    private void addCourse(Course course) {
+        if (currentAdmin != null) {
+            DBUtils.insertCourse(course);
+            courses = DBUtils.getTableCourseData();
         }
     }
 
     public void runAdmin() {
-        System.out.println("Running System Administration" );
+        if (currentAdmin != null) {
+            printHeader(RUNNING_SYSTEM_ADMINISTRATION);
 
-        Scanner in = new Scanner(System.in);
+            String input = scanRunAdminChoice();
 
-        printQForExit();
-        System.out.println("Would you like" );
-        System.out.println("1 - Register new user" );
-        System.out.println("2 - Add new course" );
-        System.out.println("3 - Register Student/Professor for Course" );
-        System.out.println("4 - Print existing data from DB" );
+            switch (input) {
+                case "Q", "q" -> {
+                    new Admin().setCurrentUserNull();
+                    new SignUp().runAJUApp();
+                }
+                case "1" -> runRegistration();
+                case "2" -> runAddCourse();
+                case "3" -> runRegisterForCourse();
+                case "4" -> runPrintInformation();
+            }
+        }
+    }
 
-        String input = in.nextLine();
-
-        switch (input) {
-            case "Q", "q" -> new SignUp().runAJUApp();
-            case "1" -> runRegistration();
-            case "2" -> runAddCourse();
-            case "3" -> runRegisterForCourse();
-            case "4" -> runPrintInformation();
+    @Override
+    public void runIfQ(String input) {
+        if (currentAdmin != null && input.equalsIgnoreCase("Q")) {
+            runAdmin();
         }
     }
 
     private void runRegistration() {
-        System.out.println("\n\n\nRunning Registration" );
+        if (currentAdmin != null) {
+            printHeader(RUNNING_REGISTRATION);
 
-        Scanner in = new Scanner(System.in);
+            String input = scanRegistrationChoice();
 
-        printQForExit();
-        System.out.println("Would you like" );
-        System.out.println("1 - Register new Student" );
-        System.out.println("2 - Register new Professor" );
-        System.out.println("3 - Register new Admin" );
-
-        String input = in.nextLine();
-
-        switch (input) {
-            case "Q", "q" -> runAdmin();
-            case "1" -> runRegisterNewStudent();
-            case "2" -> runRegisterNewProfessor();
-            case "3" -> runRegisterNewAdmin();
+            switch (input) {
+                case "Q", "q" -> runAdmin();
+                case "1" -> runRegisterNewStudent();
+                case "2" -> runRegisterNewProfessor();
+                case "3" -> runRegisterNewAdmin();
+            }
         }
     }
 
     private void runAddCourse() {
-        printCoursesList();
+        if (currentAdmin != null) {
+            printAvailableCoursesList();
+            printHeader(ADD_NEW_COURSE);
 
-        System.out.println("\n\nAdd New Course" );
+            final String courseName = scanCourseName();
+            final int price = Integer.parseInt(scanCoursePrice());
 
-        Scanner in = new Scanner(System.in);
+            addCourse(new Course(courseName, price));
 
-        printQForExit();
-        System.out.print("Enter course name: " );
-        String input = in.nextLine();
-        runAdminIfQ(input);
-        final String courseName = input;
-
-        System.out.print("Enter course price (whole number): " );
-        input = in.nextLine();
-        runAdminIfQ(input);
-        String coursePrice = input;
-        final int price = Integer.parseInt(coursePrice);
-
-        addCourse(new Course(courseName, price));
-
-        printQForExit();
-        System.out.println("Would you like to add another course?" );
-        System.out.println("1 - yes" );
-        System.out.println("2 - no" );
-        input = in.nextLine();
-
-        switch (input) {
-            case "Q", "q", "2" -> runAdmin();
-            case "1" -> runAddCourse();
+            String input = scanAddAnotherCourse();
+            switch (input) {
+                case "Q", "q", "2" -> runAdmin();
+                case "1" -> runAddCourse();
+            }
         }
     }
 
     private void runPrintInformation() {
-        System.out.println("\n\nRunning Print Information" );
+        if (currentAdmin != null) {
+            printHeader(RUNNING_PRINT_INFORMATION);
 
-        Scanner in = new Scanner(System.in);
-
-        printQForExit();
-        System.out.println("Would you like" );
-        System.out.println("1 - Print Admins" );
-        System.out.println("2 - Print Students" );
-        System.out.println("3 - Print Professors" );
-        System.out.println("4 - Print Courses" );
-
-        String input = in.nextLine();
-
-        switch (input) {
-            case "Q", "q" -> runAdmin();
-            case "1" -> runPrintAdminsList();
-            case "2" -> runPrintStudentsList();
-            case "3" -> runPrintProfessorsList();
-            case "4" -> runPrintCoursesList();
+            String input = scanPrintInformationChoice();
+            switch (input) {
+                case "Q", "q" -> runIfQ(input);
+                case "1" -> runPrintAdminsList();
+                case "2" -> runPrintStudentsList();
+                case "3" -> runPrintProfessorsList();
+                case "4" -> runPrintCoursesList();
+                case "5" -> runPrintBalanceForStudent();
+            }
         }
     }
 
     private void runPrintAdminsList() {
-        System.out.println("\n\n\nAdmins List:" );
-        printAdminsList();
-        runAdmin();
+        if (currentAdmin != null) {
+            printHeader(ADMINS_LIST);
+            printAdminsList();
+            runAdmin();
+        }
     }
 
     private void runPrintStudentsList() {
-        System.out.println("\n\n\nStudents List:" );
-        printStudentsList();
-        runAdmin();
+        if (currentAdmin != null) {
+            printHeader(STUDENTS_LIST);
+            printStudentsList();
+            runAdmin();
+        }
     }
 
     private void runPrintProfessorsList() {
-        System.out.println("\n\n\nProfessors List:" );
-        printProfessorsList();
-        runAdmin();
+        if (currentAdmin != null) {
+            printHeader(PROFESSORS_LIST);
+            printProfessorsList();
+            runAdmin();
+        }
     }
 
     private void runPrintCoursesList() {
-        System.out.println("\n\n\nCourses List:" );
-        printCoursesList();
-        runAdmin();
-    }
-
-    private String[] scanFirstAndLastNames() {
-        Scanner in = new Scanner(System.in);
-
-        printQForExit();
-        System.out.print("Enter first name: " );
-        String input = in.nextLine();
-        runAdminIfQ(input);
-        final String firstName = input;
-
-        System.out.print("Enter last name: " );
-        input = in.nextLine();
-        runAdminIfQ(input);
-        final String lastName = input;
-
-        return new String[]{firstName, lastName};
+        if (currentAdmin != null) {
+            printHeader(COURSES_LIST);
+            printAvailableCoursesList();
+            runAdmin();
+        }
     }
 
     private void runRegisterNewStudent() {
-        System.out.println("\n\nRegister New Student" );
+        if (currentAdmin != null) {
+            printHeader(REGISTER_NEW_STUDENT);
 
-        final String[] data = scanFirstAndLastNames();
-        addStudent(data[0], data[1]);
+            final String firstName = scanFirsName();
+            final String lastName = scanLastName();
 
-        System.out.println("New Student registered:" );
-        printLastStudent();
-        scanRegisterForCourse(getLastStudent());
+            addStudent(firstName, lastName);
+
+            printHeader(NEW_STUDENT_REGISTERED);
+            printLastStudent();
+            getCourseRegistrationChoice(getLastStudent());
+        }
     }
 
     private void runRegisterNewProfessor() {
-        System.out.println("\n\nRegister New Professor" );
+        if (currentAdmin != null) {
+            printHeader(REGISTER_NEW_PROFESSOR);
 
-        final String[] data = scanFirstAndLastNames();
-        addProfessor(data[0], data[1]);
+            final String firstName = scanFirsName();
+            final String lastName = scanLastName();
 
-        System.out.println("New Professor registered:" );
-        printLastProfessor();
-        scanRegisterForCourse(getLastProfessor());
+            addProfessor(firstName, lastName);
+
+            printHeader(NEW_PROFESSOR_REGISTERED);
+            printLastProfessor();
+            getCourseRegistrationChoice(getLastProfessor());
+        }
     }
 
     private void runRegisterNewAdmin() {
-        System.out.println("\n\nRegister New Admin" );
+        if (currentAdmin != null) {
+            printHeader(REGISTER_NEW_ADMIN);
 
-        final String[] data = scanFirstAndLastNames();
-        addAdmin(new Admin(data[0], data[1]));
+            final String firstName = scanFirsName();
+            final String lastName = scanLastName();
 
-        System.out.println("New Admin registered:" );
-        printLastAdmin();
-        runRegistration();
+            addAdmin(firstName, lastName);
+
+            printHeader(NEW_ADMIN_REGISTERED);
+            printLastAdmin();
+            runRegistration();
+        }
     }
 
-    private <T> void scanRegisterForCourse(Academic<T> person) {
-        Scanner in = new Scanner(System.in);
-
-        printQForExit();
-
-        switch (person.getRole()) {
-            case 'S' -> System.out.println(
-                    "\n\nWould you like to register Student "
-                            + person.getFirstName() + " " + person.getLastName()
-                            + " for courses?"
-            );
-            case 'P' -> System.out.println(
-                    "\n\nWould you like to assign Professor "
-                            + person.getFirstName() + " " + person.getLastName()
-                            + " to teach courses?"
-            );
-        }
-
-        System.out.println("1 - yes" );
-        System.out.println("2 - no" );
-        String input = in.nextLine();
-
-        switch (input) {
-            case "Q", "q", "2" -> runRegistration();
-            case "1" -> runCourseRegistration(person);
+    private <T> void getCourseRegistrationChoice(Academic<T> person) {
+        if (currentAdmin != null) {
+            String input = scanCourseRegistrationChoice(person);
+            switch (input) {
+                case "Q", "q", "2" -> runRegistration();
+                case "1" -> runCourseRegistration(person);
+            }
         }
     }
 
     private void runRegisterForCourse() {
-        System.out.println("\n\n\nRegister for Course");
-        Scanner in = new Scanner(System.in);
+        if (currentAdmin != null) {
+            printHeader(REGISTER_FOR_COURSES);
 
-        printQForExit();
-        System.out.println("Would you like to:" );
-        System.out.println("1 - Register Student for courses" );
-        System.out.println("2 - Assign Professor to teach courses" );
-
-        String input = in.nextLine();
-        switch (input) {
-            case "Q", "q" -> runAdmin();
-            case "1" -> runStudentCourseRegistration();
-            case "2" -> runProfessorCourseAssignment();
+            String input = scanPersonChoice();
+            switch (input) {
+                case "Q", "q" -> runIfQ(input);
+                case "1" -> runStudentCourseRegistration();
+                case "2" -> runProfessorCourseAssignment();
+            }
         }
     }
 
     private void runStudentCourseRegistration() {
-        System.out.println("\n\n\n" );
-        Scanner in = new Scanner(System.in);
+        if (currentAdmin != null) {
+            System.out.println("\n\n\n ");
 
-        printQForExit();
-        System.out.println("Would you like to:" );
-        System.out.println("1 - Input Student Id" );
-        System.out.println("2 - Print Students List" );
-
-        String input = in.nextLine();
-        switch (input) {
-            case "Q", "q" -> runRegisterForCourse();
-            case "1" -> runConfirmStudent();
-            case "2" -> {
-                printStudentsList();
-                runStudentCourseRegistration();
+            String input = scanPrintListChoice();
+            switch (input) {
+                case "Q", "q" -> runRegisterForCourse();
+                case "1" -> {
+                    printStudentsList();
+                    runConfirmStudent(true);
+                }
+                case "2" -> runConfirmStudent(true);
             }
         }
     }
 
-    private void runConfirmStudent() {
-        Scanner in = new Scanner(System.in);
-        printQForExit();
-        System.out.println();
-        System.out.print("Enter Student Id: ");
+    private void runConfirmStudent(boolean isRegistration) {
+        if (currentAdmin != null) {
+            printHeader(FIND_STUDENT);
+            System.out.println();
+            int id = scanStudentId();
 
-        String input = in.nextLine();
+            Student foundStudent = new Student().getTableData(id);
+            System.out.println(foundStudent);
+            System.out.println();
 
-        int id = Integer.parseInt(input);
-        Student student = new Student().getTableData(id);
-        System.out.println(student);
-        System.out.println();
-
-        printQForExit();
-        System.out.println("Is this information about the Student correct?");
-        System.out.println("1 - Confirm Student" );
-        System.out.println("2 - Wrong Student" );
-
-        input = in.nextLine();
-        switch (input) {
-            case "Q", "q" -> runRegisterForCourse();
-            case "1" -> {
-                assert student != null;
-                runCourseRegistration(student);
-            }
-            case "2" -> {
-                System.out.println("\n");
-                printStudentsList();
-                System.out.print("Enter Student Id: " );
+            String input = scanStudentConfirmation();
+            switch (input) {
+                case "Q", "q" -> {
+                    if (isRegistration) {
+                        runRegisterForCourse();
+                    } else {
+                        runPrintBalanceForStudent();
+                    }
+                }
+                case "1" -> {
+                    assert foundStudent != null;
+                    if (isRegistration) {
+                        runCourseRegistration(foundStudent);
+                    } else {
+                        printSchedule(foundStudent);
+                        printBalance(foundStudent, getCurrentAdmin());
+                        runPrintInformation();
+                    }
+                }
+                case "2" -> {
+                    System.out.println("\n");
+                    printStudentsList();
+                    runConfirmStudent(true);
+                }
             }
         }
     }
 
+    //TODO Add Professor Functionality
     private void runProfessorCourseAssignment() {
-
+        if (currentAdmin != null) {
+            System.out.println("TO DO: runProfessorCourseAssignment()");
+        }
     }
 
     private <T> void runCourseRegistration(Academic<T> person) {
-        int count = person.getRole() == 'S' ? 6 : 3;
+        if (currentAdmin != null) {
+            int count = person.getRole() == 'S' ? 6 : 3;
 
-        List<Integer> coursesIds = new ArrayList<>();
-        Scanner in = new Scanner(System.in);
+            List<Integer> coursesIds = new ArrayList<>();
 
-        printCoursesList();
-        printQForExit();
-        do {
-            System.out.print("Enter course id: " );
-            String input = in.nextLine();
-            if (input.equalsIgnoreCase("Q" ) && coursesIds.size() == 0) {
-                runAdmin();
-            } else if (input.equalsIgnoreCase("Q" ) && coursesIds.size() != 0) {
-                registerForCourses(person, coursesIds);
-                printStudentsList();
-                runRegistration();
-            } else {
-                courses = DBUtils.getTableCourseData();
-                for (Course course : courses) {
-                    if (Integer.parseInt(input) == course.getTblCourseId()) {
-                        coursesIds.add(course.getTblCourseId());
+            printAvailableCoursesList();
+            printQForExit();
+            do {
+                String input = scanCourseId();
+                if (input.equalsIgnoreCase("Q") && coursesIds.size() == 0) {
+                    runAdmin();
+                } else if (input.equalsIgnoreCase("Q") && coursesIds.size() != 0) {
+                    updatePersonCourses(person, coursesIds);
+                    count = 0;
+                    runRegistration();
+                } else {
+                    courses = DBUtils.getTableCourseData();
+                    for (Course course : courses) {
+                        if (Integer.parseInt(input) == course.getTblCourseId()) {
+                            coursesIds.add(course.getTblCourseId());
+                            count--;
+                        }
+                    }
+                }
+
+            } while (count != 0);
+            updatePersonCourses(person, coursesIds);
+            runRegistration();
+        }
+    }
+
+    public <T> void updatePersonCourses(Academic<T> person, List<Integer> coursesIds) {
+        if (currentAdmin != null) {
+            final int[] dbIds = {person.getCourse1(), person.getCourse2(), person.getCourse3(),
+                    person.getCourse4(), person.getCourse5(), person.getCourse6()};
+
+            for (int courseId : coursesIds) {
+                for (int i = 0; i <= dbIds.length - 1; i++) {
+                    if (dbIds[i] == 0) {
+                        dbIds[i] = courseId;
+                        switch (i) {
+                            case 0 -> person.setCourse1(courseId);
+                            case 1 -> person.setCourse2(courseId);
+                            case 2 -> person.setCourse3(courseId);
+                            case 3 -> person.setCourse4(courseId);
+                            case 4 -> person.setCourse5(courseId);
+                            case 5 -> person.setCourse6(courseId);
+                        }
+                        break;
                     }
                 }
             }
-            count--;
-        } while (count != 0);
+            DBUtils.updateAcademicEnroll(person);
+            Student.students = DBUtils.getTableStudentData();
+            Professor.professors = DBUtils.getTableProfessorData();
+        }
     }
+
+    private void runPrintBalanceForStudent() {
+        String input = scanPrintListChoice();
+        switch (input) {
+            case "Q", "q" -> runPrintInformation();
+            case "1" -> {
+                printStudentsList();
+                runConfirmStudent(false);
+            }
+            case "2" -> runConfirmStudent(false);
+        }
+
+    };
 }

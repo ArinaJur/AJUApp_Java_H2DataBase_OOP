@@ -6,6 +6,7 @@ import ajuapp.database.Table;
 import java.util.ArrayList;
 import java.util.List;
 
+@Author
 public final class Course {
     final private int tblCourseId;
     final private String courseName;

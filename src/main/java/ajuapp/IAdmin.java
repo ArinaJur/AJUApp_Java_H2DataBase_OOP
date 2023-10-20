@@ -4,10 +4,11 @@ import ajuapp.database.DBUtils;
 
 import static ajuapp.Admin.admins;
 import static ajuapp.Student.students;
+import static ajuapp.Professor.professors;
+import static ajuapp.utils.ProjectConstants.*;
 
-public interface IPrintAdmin {
-    String NO_ADMINS = "There are no admins registered in DB";
-    String NO_STUDENTS = "There are no students registered in DB";
+@Author
+public interface IAdmin {
 
     default void printAdminsList() {
         admins = DBUtils.getTableAdminData();
@@ -46,10 +47,20 @@ public interface IPrintAdmin {
     }
 
     default void printLastProfessor() {
-
+        professors = DBUtils.getTableProfessorData();
+        if (professors.size() > 0) {
+            System.out.println(professors.get(professors.size() - 1));
+        } else {
+            System.out.println(NO_PROFESSORS);
+        }
     }
 
     default void printProfessorsList() {
-
+        professors = DBUtils.getTableProfessorData();
+        if (professors.size() > 0) {
+            System.out.println(professors);
+        } else {
+            System.out.println(NO_PROFESSORS);
+        }
     }
 }

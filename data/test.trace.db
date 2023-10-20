@@ -92,3 +92,29 @@ org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "TBL_ACADEMICWHERE" not found; SQ
 SELECT * FROM tbl_academicWHERE academic_id = 13 [42102-220]
 2023-10-12 02:59:15 jdbc[3]: exception
 org.h2.jdbc.JdbcSQLNonTransientException: No data is available [2000-220]
+2023-10-19 16:34:50 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Column "FIRST_NAME" not found [42122-220]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:514)
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:489)
+	at org.h2.message.DbException.get(DbException.java:223)
+	at org.h2.message.DbException.get(DbException.java:199)
+	at org.h2.jdbc.JdbcResultSet.getColumnIndex(JdbcResultSet.java:3492)
+	at org.h2.jdbc.JdbcResultSet.getString(JdbcResultSet.java:301)
+	at ajuapp.database.DBUtils.getTableAdminData(DBUtils.java:82)
+	at ajuapp.SignUp.signUp(SignUp.java:20)
+	at ajuapp.SignUp.runAJUApp(SignUp.java:66)
+	at ajuapp.App.runAJUApp(App.java:7)
+	at ajuapp.AJUApp.main(AJUApp.java:6)
+2023-10-19 16:34:50 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Column "FIRST_NAME" not found [42122-220]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:514)
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:489)
+	at org.h2.message.DbException.get(DbException.java:223)
+	at org.h2.message.DbException.get(DbException.java:199)
+	at org.h2.jdbc.JdbcResultSet.getColumnIndex(JdbcResultSet.java:3492)
+	at org.h2.jdbc.JdbcResultSet.getString(JdbcResultSet.java:301)
+	at ajuapp.database.DBUtils.getTableStudentData(DBUtils.java:124)
+	at ajuapp.SignUp.signUp(SignUp.java:21)
+	at ajuapp.SignUp.runAJUApp(SignUp.java:66)
+	at ajuapp.App.runAJUApp(App.java:7)
+	at ajuapp.AJUApp.main(AJUApp.java:6)

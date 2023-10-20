@@ -1,16 +1,18 @@
 package ajuapp;
 
 import ajuapp.database.DBUtils;
-import java.util.Scanner;
 
 import static ajuapp.Admin.admins;
 import static ajuapp.Professor.professors;
 import static ajuapp.Student.students;
+import static ajuapp.utils.ProjectConstants.WELCOME;
+import static ajuapp.utils.ProjectConstants.WELCOME_TO_AJU;
 
-public final class SignUp implements IExit {
+@Author
+public final class SignUp implements IExit, IScanInput {
 
     private void printWelcomeMessage() {
-        System.out.println("        Welcome to AJU!");
+        System.out.println(WELCOME_TO_AJU);
         System.out.println();
     }
 
@@ -20,50 +22,51 @@ public final class SignUp implements IExit {
         professors = DBUtils.getTableProfessorData();
 
         if (admins.size() == 0) {
-            Admin.addAdmin(new Admin("Ivan", "Sidorov"));
+            Admin.addFirstAdmin();
         }
 
-        Scanner in = new Scanner(System.in);
-
-        printQForExit();
-        System.out.print("Enter username: ");
-        String input = in.nextLine();
-        exitIfQ(input);
-        final String username = input;
-
-        System.out.print("Enter password: ");
-        input = in.nextLine();
-        exitIfQ(input);
-        final String password = input;
-
+        final String username = scanUserName();
+        final String password = scanPassword();
         checkCredentials(username, password);
     }
 
     private void checkCredentials(String userName, String password) {
         for(Admin admin: admins) {
             if(admin.getUserName().equals(userName) && admin.getPassword().equals(password) && admin.getRole() == 'A') {
-                System.out.println("\n\n\nWelcome, " + admin.getFirstName() + " " + admin.getLastName() + "!\n");
-                admin.runAdmin();
+                admin.setCurrentAdmin(admin);
+                Admin currentAdmin = admin.getCurrentAdmin();
+                welcome(currentAdmin);
+                currentAdmin.runAdmin();
             }
         }
         for (Student student : students) {
             if(student.getUserName().equals(userName) && student.getPassword().equals(password) && student.getRole() == 'S') {
-                System.out.println("Welcome, " + student.getFirstName() + " " + student.getLastName() + "!");
-                student.runStudent();
+                student.setCurrentStudent(student);
+                welcome(student.getCurrentStudent());
+                student.getCurrentStudent().runStudent();
             }
         }
         for (Professor professor : professors) {
             if(professor.getUserName().equals(userName) && professor.getPassword().equals(password) && professor.getRole() == 'P') {
-                System.out.println("Welcome, " + professor.getFirstName() + " " + professor.getLastName() + "!");
+                professor.setCurrentProfessor(professor);
+                welcome(professor.getCurrentProfessor());
                 professor.runProfessor();
             }
         }
 
+        new Admin().setCurrentUserNull();
         exitIfUnauthorizedUser();
+    }
+
+    private <T> void welcome(Person<T> person) {
+        System.out.println(WELCOME + person.getFirstName() + " " + person.getLastName() + "!\n");
     }
 
     public void runAJUApp() {
         printWelcomeMessage();
         signUp();
     }
+
+    @Override
+    public void runIfQ(String input) {}
 }

@@ -6,14 +6,19 @@ import ajuapp.database.Table;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class Student extends Academic<Student> implements IPrintAcademic {
+import static ajuapp.utils.ProjectConstants.*;
+
+@Author
+public final class Student extends Academic<Student> implements IAcademic, IExit, IScanInput, IStudent {
     private int tblStudentId;
     private int tblStudentPersonId;
     private int tblStudentAcademicId;
     private String roleId = "S";
     public static List<Student> students = new ArrayList<>();
+    private static Student currentStudent = null;
 
-    public Student() {}
+    public Student() {
+    }
 
     public Student(String firstName, String lastName) {
         super(firstName, lastName);
@@ -49,14 +54,12 @@ public final class Student extends Academic<Student> implements IPrintAcademic {
         return roleId;
     }
 
-    private String getCourseName (int courseId) {
-        List<Course> courses = DBUtils.getTableCourseData();
-        for (Course course : courses) {
-            if(course.getTblCourseId() == courseId) {
-                return course.getCourseName();
-            }
-        }
-        return "";
+    public Student getCurrentStudent() {
+        return currentStudent;
+    }
+
+    public void setCurrentStudent(Student student) {
+        currentStudent = student;
     }
 
     @Override
@@ -73,12 +76,12 @@ public final class Student extends Academic<Student> implements IPrintAcademic {
                 "username = '" + getUserName() + "',\n" +
                 "password = '" + getPassword() + "',\n" +
                 "Student enrolled to courses: \n" +
-                "course1 = '" + getCourseName(getCourse1()) + "',\n" +
-                "course2 = '" + getCourseName(getCourse2()) + "',\n" +
-                "course3 = '" + getCourseName(getCourse3()) + "',\n" +
-                "course4 = '" + getCourseName(getCourse4()) + "',\n" +
-                "course5 = '" + getCourseName(getCourse5()) + "',\n" +
-                "course6 = '" + getCourseName(getCourse6()) + "',\n" +
+                "course1 = '" + getAvailableCourseName(getCourse1()) + "',\n" +
+                "course2 = '" + getAvailableCourseName(getCourse2()) + "',\n" +
+                "course3 = '" + getAvailableCourseName(getCourse3()) + "',\n" +
+                "course4 = '" + getAvailableCourseName(getCourse4()) + "',\n" +
+                "course5 = '" + getAvailableCourseName(getCourse5()) + "',\n" +
+                "course6 = '" + getAvailableCourseName(getCourse6()) + "',\n" +
                 "},\n";
     }
 
@@ -104,6 +107,40 @@ public final class Student extends Academic<Student> implements IPrintAcademic {
     }
 
     public void runStudent() {
+        if (getCurrentStudent() != null) {
+            printHeader(RUNNING_STUDENT
+                    + getCurrentStudent().getFirstName() + " "
+                    + getCurrentStudent().getLastName() + ",  "
+                    + getCurrentStudent().getRoleId()
+            );
 
+            String input = scanRunStudentChoice();
+            switch (input) {
+                case "Q", "q" -> {
+                    getCurrentStudent().setCurrentUserNull();
+                    new SignUp().runAJUApp();
+                }
+                case "1" -> {
+                    printSchedule(getCurrentStudent());
+                    runStudent();
+                }
+                case "2" -> {
+                    printAvailableCoursesList();
+                    runStudent();
+                }
+                case "3" -> {
+                    printSchedule(getCurrentStudent());
+                    printBalance(getCurrentStudent(), getCurrentStudent());
+                    runStudent();
+                }
+            }
+        }
+    }
+
+    @Override
+    public void runIfQ(String input) {
+        if (getCurrentStudent() != null) {
+            runStudent();
+        }
     }
 }

@@ -6,6 +6,7 @@ import ajuapp.database.Table;
 import java.util.ArrayList;
 import java.util.List;
 
+@Author
 public abstract class Academic<T> extends Person<T> {
     private int tblAcademicId;
     private int course1;
@@ -14,7 +15,7 @@ public abstract class Academic<T> extends Person<T> {
     private int course4;
     private int course5;
     private int course6;
-    public List<T> academics = new ArrayList<>();
+    public List<Academic<T>> academics = new ArrayList<>();
 
     public Academic(String firstName, String lastName) {
         super(firstName, lastName);
@@ -98,17 +99,17 @@ public abstract class Academic<T> extends Person<T> {
         return getTblAcademicId();
     }
 
-    public T getTableData(Academic<T> person) {
-        academics = DBUtils.getTableAcademicData(person);
-        for(T academic : academics) {
-            if (person.getTblPersonId() == person.getId()) {
-                return academic;
-            }
-        }
-        return null;
+    public abstract int getAcademicId();
+
+    public Academic<T> getTableData(Academic<T> person) {
+        Academic<T> personData = DBUtils.getTableAcademicData(person);
+        assert (academics.size() == 1);
+        return personData;
     }
 
-    public abstract int getAcademicId();
+    public Academic<T> getAcademicData(Academic<T> person) {
+        return getTableData(person);
+    }
 
     @Override
     public String toString() {

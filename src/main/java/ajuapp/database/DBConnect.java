@@ -1,5 +1,7 @@
 package ajuapp.database;
 
+import ajuapp.Author;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.Connection;
@@ -9,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+@Author
 public final class DBConnect {
 
     private static List<String> getDBProperties() {
@@ -30,7 +33,7 @@ public final class DBConnect {
     }
 
     public static Connection getConnection() {
-        List<String> dbProperties = getDBProperties();
+        final List<String> dbProperties = getDBProperties();
         Connection connection = null;
 
         try {

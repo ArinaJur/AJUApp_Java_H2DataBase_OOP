@@ -1,6 +1,7 @@
 package ajuapp;
 
-public class App {
+@Author
+public final class App {
     public static void runAJUApp() {
         SignUp signUp = new SignUp();
         signUp.runAJUApp();

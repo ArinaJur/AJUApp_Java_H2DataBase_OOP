@@ -4,8 +4,14 @@ import ajuapp.database.DBUtils;
 import ajuapp.database.Table;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import static ajuapp.Course.courses;
+import static ajuapp.utils.ProjectConstants.*;
+
+@Author
 public abstract class Person<T> {
     private int tblPersonId;
     private String firstName;
@@ -19,7 +25,7 @@ public abstract class Person<T> {
     public Person(String firstName, String lastName) {
         final int maxPersonId = DBUtils.getLastId(Table.NAME.TBL_PERSON);
         this.tblPersonId = maxPersonId + 1;
-        final int userNameId = tblPersonId + 1097523;
+        final int userNameId = tblPersonId + NUMBER;
         this.firstName = capitalizeString(firstName);
         this.lastName = capitalizeString(lastName);
         this.userName = generateUsername(userNameId);
@@ -45,7 +51,7 @@ public abstract class Person<T> {
     private String generatePassword(int userNameId) {
         final String fLetter = String.valueOf(getFirstName().trim().toLowerCase().charAt(0));
         final String sLetter = String.valueOf(getLastName().toUpperCase().trim().charAt(0));
-        return fLetter + sLetter + (userNameId / 9);
+        return fLetter + sLetter + (userNameId / DIVISOR);
     }
 
     public int getTblPersonId() {
@@ -68,6 +74,10 @@ public abstract class Person<T> {
         return password;
     }
 
+    public int getId() {
+        return getTblPersonId();
+    }
+
     public abstract char getRole();
 
     public T getTableData(int id) {
@@ -80,10 +90,6 @@ public abstract class Person<T> {
         return null;
     };
 
-    public int getId() {
-        return getTblPersonId();
-    }
-
     @Override
     public String toString() {
         return "Person {\n" +
@@ -94,4 +100,10 @@ public abstract class Person<T> {
                 "password = '" + getPassword() + "',\n" +
                 "},\n";
     }
+
+    public void setCurrentUserNull(){
+        new Student().setCurrentStudent(null);
+        new Professor().setCurrentProfessor(null);
+        new Admin().setCurrentAdmin(null);
+    };
 }

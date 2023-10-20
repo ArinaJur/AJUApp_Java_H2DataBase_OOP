@@ -4,10 +4,25 @@ import ajuapp.database.DBUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-public final class Professor extends Academic<Professor> {
+@Author
+public final class Professor extends Academic<Professor> implements IAcademic {
     private String roleId = "P";
     public static List<Professor> professors = new ArrayList<>();
+    private Professor currentProfessor = null;
+
+    public Professor getCurrentProfessor() {
+        return currentProfessor;
+    }
+
+    public String getRoleId() {
+        return roleId;
+    }
+
+    public void setCurrentProfessor(Professor professor) {
+        this.currentProfessor = professor;
+    }
 
     @Override
     public char getRole() {
@@ -24,9 +39,6 @@ public final class Professor extends Academic<Professor> {
         return 0;
     }
 
-    public void runProfessor(){
-
-    }
-
+    public void runProfessor(){}
 
 }
